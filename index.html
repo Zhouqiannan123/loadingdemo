@@ -191,6 +191,20 @@
       .version-info a:hover {
         text-decoration: underline;
       }
+
+      .speed-info {
+        margin-top: 8px;
+        text-align: center;
+      }
+
+      .speed-info small {
+        color: #28a745;
+        font-weight: 500;
+        background-color: rgba(40, 167, 69, 0.1);
+        padding: 4px 8px;
+        border-radius: 12px;
+        border: 1px solid rgba(40, 167, 69, 0.2);
+      }
     </style>
   </head>
   <body>
@@ -198,7 +212,8 @@
       <h1>📚 教辅答案逐字显现演示</h1>
 
       <div class="version-info">
-        <p><strong>当前版本：</strong>V2 - 逐字显现版本（智能识别独立文字）</p>
+        <p><strong>当前版本：</strong>V2.2 - 极速切换优化版本</p>
+        <p>⚡ 新特性：题目间切换极速模式（1ms），答案内容保持可读速度</p>
         <p>
           <a href="index_v1.html" target="_blank"
             >切换到V1版本（逐行显现效果）</a
@@ -229,6 +244,9 @@
         <label for="speedRange">动画速度：</label>
         <input type="range" id="speedRange" min="1" max="10" value="9" />
         <span id="speedValue">9</span>
+        <div class="speed-info">
+          <small>⚡ 题目间切换已优化为极速模式（1ms）</small>
+        </div>
       </div>
 
       <div class="controls">

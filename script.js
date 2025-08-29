@@ -9,6 +9,7 @@ class AnswerAnimator {
     this.currentFrame = 0
     this.isAnimating = false
     this.animationSpeed = 14 // 毫秒 (对应速度9: 50 - 9*4 = 14ms)
+    this.fastTransitionSpeed = 1 // 题目间快速切换的速度（毫秒，极速模式）
     this.animationTimer = null
 
     this.initializeEventListeners()
@@ -48,6 +49,7 @@ class AnswerAnimator {
       const speed = parseInt(e.target.value)
       speedValue.textContent = speed
       this.animationSpeed = 50 - speed * 4 // 反向映射，数值越大速度越快，范围：10-46ms
+      this.fastTransitionSpeed = 1 // 过渡速度始终保持1ms极速
     })
   }
 
@@ -215,8 +217,22 @@ class AnswerAnimator {
         return centerA.y - centerB.y
       })
 
-      // 每个文字作为一个动画帧
-      this.animationFrames = characters
+      // 为每个文字分配动画帧，并标记类型（内容文字 vs 空白区域）
+      this.animationFrames = characters.map((character, index) => {
+        const center = this.getComponentCenter(character)
+        const isTransition = this.isTransitionElement(
+          character,
+          characters,
+          index
+        )
+
+        return {
+          pixels: character,
+          center: center,
+          isTransition: isTransition, // 是否为题目间的过渡元素
+          size: character.length,
+        }
+      })
 
       console.log(`识别出 ${this.animationFrames.length} 个独立文字/符号`)
     } catch (error) {
@@ -336,6 +352,50 @@ class AnswerAnimator {
     }
   }
 
+  // 判断是否为过渡元素（题目编号、标点符号等）
+  isTransitionElement(character, allCharacters, index) {
+    const center = this.getComponentCenter(character)
+    const size = character.length
+
+    // 更小尺寸的元素（如标点、题号）- 降低阈值
+    if (size < 100) {
+      return true
+    }
+
+    // 检查垂直间距，如果与上一个元素间距较大，可能是新题目的开始
+    if (index > 0) {
+      const prevCenter = this.getComponentCenter(allCharacters[index - 1])
+      const verticalGap = Math.abs(center.y - prevCenter.y)
+
+      // 降低间距阈值，更积极地识别题目间隔
+      if (verticalGap > 30) {
+        return true
+      }
+    }
+
+    // 检查是否为题目编号（扩大识别范围）
+    if (center.x < 150 && size < 300) {
+      return true
+    }
+
+    // 检查是否为单独的符号或数字（通常是题目编号的一部分）
+    if (size < 200) {
+      return true
+    }
+
+    // 检查下一个元素的间距，如果与下一个元素间距较大，也可能是题目结尾
+    if (index < allCharacters.length - 1) {
+      const nextCenter = this.getComponentCenter(allCharacters[index + 1])
+      const nextVerticalGap = Math.abs(nextCenter.y - center.y)
+
+      if (nextVerticalGap > 30) {
+        return true
+      }
+    }
+
+    return false
+  }
+
   startAnimation() {
     if (this.animationFrames.length === 0) return
 
@@ -352,8 +412,9 @@ class AnswerAnimator {
       return
     }
 
-    // 绘制当前文字的所有像素点（一次性显示整个文字）
-    const characterPixels = this.animationFrames[this.currentFrame]
+    // 获取当前帧数据
+    const currentFrame = this.animationFrames[this.currentFrame]
+    const characterPixels = currentFrame.pixels
 
     // 批量绘制整个文字
     characterPixels.forEach((pixel) => {
@@ -372,10 +433,27 @@ class AnswerAnimator {
 
     this.currentFrame++
 
+    // 根据元素类型选择播放速度
+    const isTransition = currentFrame.isTransition
+    const nextDelay = isTransition
+      ? this.fastTransitionSpeed
+      : this.animationSpeed
+
+    // 记录速度使用情况用于调试
+    if (isTransition) {
+      console.log(
+        `⚡极速过渡元素: 位置(${Math.round(
+          currentFrame.center.x
+        )}, ${Math.round(currentFrame.center.y)}), 大小:${
+          currentFrame.size
+        }, 极速模式:${nextDelay}ms`
+      )
+    }
+
     // 设置下一帧（显示下一个文字）
     this.animationTimer = setTimeout(() => {
       this.animateFrame()
-    }, this.animationSpeed)
+    }, nextDelay)
   }
 
   pauseAnimation() {
