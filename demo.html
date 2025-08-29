@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>教辅答案动画演示 - 版本对比</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 20px;
+        font-family: 'Microsoft YaHei', Arial, sans-serif;
+        background-color: #f5f5f5;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 40px;
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .version-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      .version-card {
+        background: white;
+        border-radius: 10px;
+        padding: 25px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+      }
+
+      .version-card:hover {
+        transform: translateY(-5px);
+      }
+
+      .version-title {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 15px;
+        color: #333;
+      }
+
+      .v1-title {
+        color: #ffc107;
+      }
+
+      .v2-title {
+        color: #007bff;
+      }
+
+      .version-description {
+        color: #666;
+        line-height: 1.6;
+        margin-bottom: 20px;
+      }
+
+      .features-list {
+        list-style: none;
+        padding: 0;
+        margin: 20px 0;
+      }
+
+      .features-list li {
+        padding: 8px 0;
+        border-bottom: 1px solid #eee;
+      }
+
+      .features-list li:last-child {
+        border-bottom: none;
+      }
+
+      .demo-button {
+        display: inline-block;
+        padding: 12px 25px;
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        font-weight: 500;
+        transition: background-color 0.3s ease;
+        margin-top: 15px;
+      }
+
+      .demo-button:hover {
+        background-color: #0056b3;
+      }
+
+      .v1-button {
+        background-color: #ffc107;
+        color: #333;
+      }
+
+      .v1-button:hover {
+        background-color: #e0a800;
+      }
+
+      .recommended {
+        position: relative;
+      }
+
+      .recommended::before {
+        content: '⭐ 推荐';
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        background: #28a745;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-size: 12px;
+        font-weight: bold;
+      }
+
+      .tech-info {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 6px;
+        margin-top: 20px;
+        border-left: 4px solid #007bff;
+      }
+
+      .tech-info h4 {
+        margin: 0 0 10px 0;
+        color: #495057;
+      }
+
+      .tech-info p {
+        margin: 0;
+        color: #6c757d;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>📚 教辅答案逐字显现演示</h1>
+      <p>两种不同的动画效果，满足不同的展示需求</p>
+    </div>
+
+    <div class="version-grid">
+      <div class="version-card">
+        <h2 class="version-title v1-title">V1版本 - 逐行显现</h2>
+        <p class="version-description">
+          像素级渐进显现效果，模拟墨水逐渐渗透纸张的自然过程。适合需要细腻动画效果的场景。
+        </p>
+
+        <ul class="features-list">
+          <li>✨ 像素级精细动画</li>
+          <li>🎨 模拟手写渐现效果</li>
+          <li>⚡ 高性能像素处理</li>
+          <li>📏 按行顺序显示</li>
+          <li>🔧 可调节显示速度</li>
+        </ul>
+
+        <div class="tech-info">
+          <h4>技术特点</h4>
+          <p>
+            使用像素分组算法，将差异像素按空间位置排序，逐帧绘制实现渐进效果。
+          </p>
+        </div>
+
+        <a href="index_v1.html" class="demo-button v1-button" target="_blank"
+          >体验V1版本</a
+        >
+      </div>
+
+      <div class="version-card recommended">
+        <h2 class="version-title v2-title">V2版本 - 逐字显现</h2>
+        <p class="version-description">
+          智能识别独立文字，实现真正的逐字显现效果。使用先进的连通分量分析算法，精确识别文字边界。
+        </p>
+
+        <ul class="features-list">
+          <li>🧠 智能文字识别</li>
+          <li>📝 真正逐字显现</li>
+          <li>🔍 连通分量分析</li>
+          <li>📖 符合阅读习惯</li>
+          <li>🎯 精确文字边界</li>
+        </ul>
+
+        <div class="tech-info">
+          <h4>技术特点</h4>
+          <p>
+            使用深度优先搜索(DFS)算法进行连通分量分析，智能识别独立文字区域，按阅读顺序显示。
+          </p>
+        </div>
+
+        <a href="index.html" class="demo-button" target="_blank">体验V2版本</a>
+      </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 40px; color: #666">
+      <p>建议先体验V2版本，然后对比V1版本的效果差异</p>
+      <p>两个版本都支持相同的图片格式和控制功能</p>
+    </div>
+  </body>
+</html>
