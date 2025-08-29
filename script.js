@@ -490,7 +490,12 @@ class AnswerAnimator {
     document.getElementById('pauseBtn').disabled = true
     document.getElementById('progressFill').style.width = '100%'
 
-    this.updateStatus('动画播放完成！', 'success')
+    // 显示完整的答案页面（V2版本效果）
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+    this.ctx.drawImage(this.answerImage, 0, 0)
+
+    this.updateStatus('🎉 动画播放完成！显示完整答案页面', 'success')
+    console.log('动画完成，已显示完整答案页面')
   }
 
   updateStatus(message, type = 'info') {
