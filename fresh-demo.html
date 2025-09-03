@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>教辅答案逐字显现演示 - 全新版本</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 20px;
+        font-family: 'Microsoft YaHei', Arial, sans-serif;
+        background-color: #f5f5f5;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .container {
+        max-width: 1000px;
+        width: 100%;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+      }
+
+      h1 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 30px;
+        font-size: 28px;
+      }
+
+      .canvas-container {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        margin-bottom: 30px;
+        border: 3px solid #ddd;
+        border-radius: 10px;
+        overflow: hidden;
+        background: #f9f9f9;
+      }
+
+      #displayCanvas {
+        display: block;
+        max-width: 100%;
+        height: auto;
+      }
+
+      .controls {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+      }
+
+      button {
+        padding: 15px 30px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        min-width: 120px;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+      }
+
+      .btn-secondary {
+        background: linear-gradient(135deg, #6c757d, #545b62);
+        color: white;
+      }
+
+      .btn-secondary:hover {
+        transform: translateY(-2px);
+      }
+
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none !important;
+      }
+
+      .speed-control {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+
+      .speed-control label {
+        font-weight: 500;
+        color: #333;
+      }
+
+      .speed-control input {
+        width: 200px;
+      }
+
+      .speed-display {
+        min-width: 80px;
+        text-align: center;
+        font-weight: bold;
+        color: #007bff;
+      }
+
+      .status {
+        text-align: center;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        font-weight: 500;
+      }
+
+      .status.ready {
+        background: #d1edff;
+        border: 2px solid #007bff;
+        color: #004085;
+      }
+
+      .status.playing {
+        background: #fff3cd;
+        border: 2px solid #ffc107;
+        color: #856404;
+      }
+
+      .status.complete {
+        background: #d4edda;
+        border: 2px solid #28a745;
+        color: #155724;
+      }
+
+      .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: #e9ecef;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 20px;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #007bff, #28a745);
+        width: 0%;
+        transition: width 0.3s ease;
+      }
+
+      .info-panel {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        border-left: 4px solid #007bff;
+      }
+
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+      }
+
+      .info-label {
+        font-weight: 500;
+        color: #495057;
+      }
+
+      .info-value {
+        color: #007bff;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>📚 教辅答案逐字显现演示</h1>
+
+      <div id="status" class="status ready">图片加载中，请稍候...</div>
+
+      <div class="canvas-container">
+        <canvas id="displayCanvas"></canvas>
+      </div>
+
+      <div class="progress-bar">
+        <div id="progressFill" class="progress-fill"></div>
+      </div>
+
+      <div class="controls">
+        <button id="startBtn" class="btn-primary" disabled>开始演示</button>
+        <button id="pauseBtn" class="btn-secondary" disabled>暂停</button>
+        <button id="resumeBtn" class="btn-secondary" disabled>继续</button>
+        <button id="resetBtn" class="btn-secondary" disabled>重置</button>
+      </div>
+
+      <div class="speed-control">
+        <label for="speedSlider">播放速度:</label>
+        <input type="range" id="speedSlider" min="1" max="100" value="20" />
+        <div class="speed-display" id="speedDisplay">20ms</div>
+      </div>
+
+      <div class="info-panel">
+        <div class="info-row">
+          <span class="info-label">检测到的差异区域:</span>
+          <span class="info-value" id="regionsCount">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">当前进度:</span>
+          <span class="info-value" id="progressInfo">0%</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">动画状态:</span>
+          <span class="info-value" id="animationStatus">准备中</span>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      class AnswerAnimation {
+        constructor() {
+          this.canvas = document.getElementById('displayCanvas')
+          this.ctx = this.canvas.getContext('2d')
+          this.blankImage = null
+          this.answerImage = null
+          this.regions = []
+          this.currentRegion = 0
+          this.animationSpeed = 20
+          this.isPlaying = false
+          this.isPaused = false
+          this.animationTimer = null
+
+          this.initializeElements()
+          this.loadImages()
+        }
+
+        initializeElements() {
+          this.startBtn = document.getElementById('startBtn')
+          this.pauseBtn = document.getElementById('pauseBtn')
+          this.resumeBtn = document.getElementById('resumeBtn')
+          this.resetBtn = document.getElementById('resetBtn')
+          this.speedSlider = document.getElementById('speedSlider')
+          this.speedDisplay = document.getElementById('speedDisplay')
+          this.status = document.getElementById('status')
+          this.progressFill = document.getElementById('progressFill')
+          this.regionsCount = document.getElementById('regionsCount')
+          this.progressInfo = document.getElementById('progressInfo')
+          this.animationStatus = document.getElementById('animationStatus')
+
+          // 绑定事件
+          this.startBtn.addEventListener('click', () => this.startAnimation())
+          this.pauseBtn.addEventListener('click', () => this.pauseAnimation())
+          this.resumeBtn.addEventListener('click', () => this.resumeAnimation())
+          this.resetBtn.addEventListener('click', () => this.resetAnimation())
+          this.speedSlider.addEventListener('input', (e) =>
+            this.updateSpeed(e.target.value)
+          )
+        }
+
+        async loadImages() {
+          try {
+            console.log('开始加载图片...')
+
+            // 加载空白页面
+            this.blankImage = await this.loadImage('images/blank-page.jpg')
+            console.log('空白页面加载完成')
+
+            // 加载答案页面
+            this.answerImage = await this.loadImage('images/answer-page.jpg')
+            console.log('答案页面加载完成')
+
+            this.setupCanvas()
+            this.findDifferenceRegions()
+            this.updateStatus(
+              'ready',
+              '图片加载完成，点击"开始演示"开始逐字显现动画'
+            )
+            this.startBtn.disabled = false
+            this.animationStatus.textContent = '就绪'
+          } catch (error) {
+            console.error('图片加载失败:', error)
+            this.updateStatus('ready', '图片加载失败，请检查图片文件是否存在')
+          }
+        }
+
+        loadImage(src) {
+          return new Promise((resolve, reject) => {
+            const img = new Image()
+            img.onload = () => resolve(img)
+            img.onerror = reject
+            img.src = src
+          })
+        }
+
+        setupCanvas() {
+          this.canvas.width = this.blankImage.width
+          this.canvas.height = this.blankImage.height
+
+          // 显示空白页面
+          this.ctx.drawImage(this.blankImage, 0, 0)
+        }
+
+        findDifferenceRegions() {
+          console.log('开始分析图片差异...')
+          const startTime = performance.now()
+
+          // 创建临时画布来获取图片数据
+          const tempCanvas = document.createElement('canvas')
+          const tempCtx = tempCanvas.getContext('2d')
+          tempCanvas.width = this.blankImage.width
+          tempCanvas.height = this.blankImage.height
+
+          // 获取空白页面数据
+          tempCtx.drawImage(this.blankImage, 0, 0)
+          const blankData = tempCtx.getImageData(
+            0,
+            0,
+            tempCanvas.width,
+            tempCanvas.height
+          )
+
+          // 获取答案页面数据
+          tempCtx.drawImage(this.answerImage, 0, 0)
+          const answerData = tempCtx.getImageData(
+            0,
+            0,
+            tempCanvas.width,
+            tempCanvas.height
+          )
+
+          // 找出所有差异像素
+          const diffPixels = []
+          const threshold = 15 // 差异阈值
+
+          for (let y = 0; y < tempCanvas.height; y++) {
+            for (let x = 0; x < tempCanvas.width; x++) {
+              const index = (y * tempCanvas.width + x) * 4
+
+              const rDiff = Math.abs(
+                blankData.data[index] - answerData.data[index]
+              )
+              const gDiff = Math.abs(
+                blankData.data[index + 1] - answerData.data[index + 1]
+              )
+              const bDiff = Math.abs(
+                blankData.data[index + 2] - answerData.data[index + 2]
+              )
+
+              const totalDiff = rDiff + gDiff + bDiff
+
+              if (totalDiff > threshold) {
+                diffPixels.push({
+                  x: x,
+                  y: y,
+                  r: answerData.data[index],
+                  g: answerData.data[index + 1],
+                  b: answerData.data[index + 2],
+                  a: answerData.data[index + 3],
+                })
+              }
+            }
+          }
+
+          console.log(`找到 ${diffPixels.length} 个差异像素`)
+
+          // 将差异像素按区域分组
+          this.regions = this.groupPixelsIntoRegions(diffPixels)
+
+          const endTime = performance.now()
+          console.log(
+            `分析完成，检测到 ${this.regions.length} 个区域，耗时 ${(
+              endTime - startTime
+            ).toFixed(1)}ms`
+          )
+
+          this.regionsCount.textContent = this.regions.length
+        }
+
+        groupPixelsIntoRegions(pixels) {
+          // 按行分组，然后在每行内按连续性分组
+          const rowGroups = new Map()
+
+          // 按Y坐标分组
+          pixels.forEach((pixel) => {
+            const rowKey = Math.floor(pixel.y / 5) * 5 // 每5像素为一行
+            if (!rowGroups.has(rowKey)) {
+              rowGroups.set(rowKey, [])
+            }
+            rowGroups.get(rowKey).push(pixel)
+          })
+
+          const regions = []
+
+          // 对每一行，按X坐标排序，然后按连续性分组
+          Array.from(rowGroups.entries())
+            .sort((a, b) => a[0] - b[0]) // 按Y坐标排序
+            .forEach(([rowY, rowPixels]) => {
+              rowPixels.sort((a, b) => a.x - b.x) // 按X坐标排序
+
+              let currentRegion = []
+              let lastX = -1
+
+              rowPixels.forEach((pixel) => {
+                if (lastX === -1 || pixel.x - lastX <= 15) {
+                  // 15像素内认为是连续的
+                  currentRegion.push(pixel)
+                } else {
+                  // 开始新的区域
+                  if (currentRegion.length > 3) {
+                    regions.push(currentRegion)
+                  }
+                  currentRegion = [pixel]
+                }
+                lastX = pixel.x
+              })
+
+              // 添加最后一个区域
+              if (currentRegion.length > 3) {
+                regions.push(currentRegion)
+              }
+            })
+
+          return regions
+        }
+
+        startAnimation() {
+          this.isPlaying = true
+          this.isPaused = false
+          this.currentRegion = 0
+
+          this.startBtn.disabled = true
+          this.pauseBtn.disabled = false
+          this.resetBtn.disabled = false
+
+          this.updateStatus('playing', '正在播放动画...')
+          this.animationStatus.textContent = '播放中'
+
+          // 重置到空白状态
+          this.ctx.drawImage(this.blankImage, 0, 0)
+
+          this.playNextRegion()
+        }
+
+        playNextRegion() {
+          if (!this.isPlaying || this.isPaused) return
+
+          if (this.currentRegion >= this.regions.length) {
+            this.completeAnimation()
+            return
+          }
+
+          // 绘制当前区域
+          const region = this.regions[this.currentRegion]
+          const imageData = this.ctx.getImageData(
+            0,
+            0,
+            this.canvas.width,
+            this.canvas.height
+          )
+
+          region.forEach((pixel) => {
+            const index = (pixel.y * this.canvas.width + pixel.x) * 4
+            imageData.data[index] = pixel.r
+            imageData.data[index + 1] = pixel.g
+            imageData.data[index + 2] = pixel.b
+            imageData.data[index + 3] = pixel.a
+          })
+
+          this.ctx.putImageData(imageData, 0, 0)
+
+          // 更新进度
+          this.currentRegion++
+          const progress = (this.currentRegion / this.regions.length) * 100
+          this.progressFill.style.width = progress + '%'
+          this.progressInfo.textContent = `${progress.toFixed(1)}%`
+
+          // 继续下一个区域
+          this.animationTimer = setTimeout(
+            () => this.playNextRegion(),
+            this.animationSpeed
+          )
+        }
+
+        pauseAnimation() {
+          this.isPaused = true
+          if (this.animationTimer) {
+            clearTimeout(this.animationTimer)
+          }
+          this.pauseBtn.disabled = true
+          this.resumeBtn.disabled = false
+          this.animationStatus.textContent = '已暂停'
+        }
+
+        resumeAnimation() {
+          this.isPaused = false
+          this.pauseBtn.disabled = false
+          this.resumeBtn.disabled = true
+          this.animationStatus.textContent = '播放中'
+          this.playNextRegion()
+        }
+
+        resetAnimation() {
+          this.isPlaying = false
+          this.isPaused = false
+          this.currentRegion = 0
+
+          if (this.animationTimer) {
+            clearTimeout(this.animationTimer)
+          }
+
+          this.startBtn.disabled = false
+          this.pauseBtn.disabled = true
+          this.resumeBtn.disabled = true
+          this.resetBtn.disabled = true
+
+          this.progressFill.style.width = '0%'
+          this.progressInfo.textContent = '0%'
+          this.animationStatus.textContent = '就绪'
+          this.updateStatus('ready', '已重置，点击"开始演示"重新开始')
+
+          // 重置画布到空白状态
+          this.ctx.drawImage(this.blankImage, 0, 0)
+        }
+
+        completeAnimation() {
+          this.isPlaying = false
+          this.pauseBtn.disabled = true
+          this.resumeBtn.disabled = true
+          this.animationStatus.textContent = '已完成'
+          this.updateStatus('complete', '动画播放完成！所有答案已显示')
+        }
+
+        updateSpeed(value) {
+          this.animationSpeed = parseInt(value)
+          this.speedDisplay.textContent = value + 'ms'
+        }
+
+        updateStatus(type, message) {
+          this.status.className = `status ${type}`
+          this.status.textContent = message
+        }
+      }
+
+      // 页面加载完成后初始化
+      document.addEventListener('DOMContentLoaded', () => {
+        new AnswerAnimation()
+      })
+    </script>
+  </body>
+</html>
+

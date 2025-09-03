@@ -16,3 +16,4 @@ Thumbs.db
 # Python缓存（用于HTTP服务器）
 __pycache__/
 *.pyc
+

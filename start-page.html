@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>教辅答案演示 - 启动页</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Microsoft YaHei', Arial, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .main-container {
+        text-align: center;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 60px 40px;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+        max-width: 500px;
+        width: 90%;
+      }
+
+      .logo {
+        font-size: 48px;
+        margin-bottom: 20px;
+        color: #667eea;
+      }
+
+      h1 {
+        font-size: 32px;
+        color: #333;
+        margin-bottom: 15px;
+        font-weight: 600;
+      }
+
+      .subtitle {
+        font-size: 18px;
+        color: #666;
+        margin-bottom: 40px;
+        line-height: 1.6;
+      }
+
+      .button-group {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        align-items: center;
+      }
+
+      .btn {
+        padding: 18px 50px;
+        border: none;
+        border-radius: 12px;
+        font-size: 18px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        min-width: 200px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.2),
+          transparent
+        );
+        transition: left 0.5s;
+      }
+
+      .btn-primary:hover::before {
+        left: 100%;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+      }
+
+      .btn-secondary {
+        background: #f8f9fa;
+        color: #495057;
+        border: 2px solid #dee2e6;
+      }
+
+      .btn-secondary:hover {
+        background: #e9ecef;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+      }
+
+      .features {
+        margin-top: 30px;
+        text-align: left;
+      }
+
+      .feature-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+        font-size: 16px;
+        color: #555;
+      }
+
+      .feature-icon {
+        color: #667eea;
+        margin-right: 12px;
+        font-size: 18px;
+      }
+
+      .loading-indicator {
+        display: none;
+        margin-top: 20px;
+        color: #667eea;
+        font-size: 16px;
+      }
+
+      .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #f3f3f3;
+        border-top: 2px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-right: 10px;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .version-info {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.8);
+        background: rgba(0, 0, 0, 0.2);
+        padding: 8px 12px;
+        border-radius: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="main-container">
+      <div class="logo">📚</div>
+      <h1>教辅答案演示</h1>
+      <p class="subtitle">智能逐字显现技术<br />让答案自然浮现</p>
+
+      <div class="button-group">
+        <button id="startBtn" class="btn btn-primary" onclick="startDemo()">
+          🚀 开始演示
+        </button>
+        <button id="resetBtn" class="btn btn-secondary" onclick="resetDemo()">
+          🔄 重置演示
+        </button>
+      </div>
+
+      <div class="features">
+        <div class="feature-item">
+          <span class="feature-icon">✨</span>
+          <span>智能文字识别算法</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">🎯</span>
+          <span>精确逐字显现效果</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">⚡</span>
+          <span>流畅动画体验</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">🎮</span>
+          <span>完整播放控制</span>
+        </div>
+      </div>
+
+      <div id="loadingIndicator" class="loading-indicator">
+        <div class="loading-spinner"></div>
+        正在初始化演示环境...
+      </div>
+    </div>
+
+    <div class="version-info">效果二 - 优化版</div>
+
+    <script>
+      function startDemo() {
+        const startBtn = document.getElementById('startBtn')
+        const loadingIndicator = document.getElementById('loadingIndicator')
+
+        // 显示加载状态
+        startBtn.disabled = true
+        startBtn.textContent = '启动中...'
+        loadingIndicator.style.display = 'block'
+
+        // 模拟初始化过程
+        setTimeout(() => {
+          // 跳转到演示页面
+          window.location.href = 'demo-effect-2.html?autostart=true'
+        }, 1500)
+      }
+
+      function resetDemo() {
+        const resetBtn = document.getElementById('resetBtn')
+        const loadingIndicator = document.getElementById('loadingIndicator')
+
+        // 显示重置状态
+        resetBtn.disabled = true
+        resetBtn.textContent = '重置中...'
+        loadingIndicator.style.display = 'block'
+        loadingIndicator.innerHTML =
+          '<div class="loading-spinner"></div>正在重置演示环境...'
+
+        // 模拟重置过程
+        setTimeout(() => {
+          // 跳转到演示页面但不自动开始
+          window.location.href = 'demo-effect-2.html?reset=true'
+        }, 1000)
+      }
+
+      // 页面加载动画
+      window.addEventListener('load', () => {
+        document.querySelector('.main-container').style.animation =
+          'fadeInUp 0.8s ease-out'
+      })
+
+      // 添加fadeInUp动画
+      const style = document.createElement('style')
+      style.textContent = `
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `
+      document.head.appendChild(style)
+    </script>
+  </body>
+</html>
+
